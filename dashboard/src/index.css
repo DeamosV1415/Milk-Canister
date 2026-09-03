@@ -1,0 +1,185 @@
+@import "tailwindcss";
+
+@import "@fontsource-variable/outfit/wght.css";
+@import "@fontsource-variable/plus-jakarta-sans/wght.css";
+
+/* ===========================================================================
+   CHILLCAN — DAYLIGHT
+
+   Built for the person selling the milk, not the person who built the can.
+   Light, warm, quiet. Colour is semantic: it only ever answers "is my milk
+   still good?" Nothing here is decorative for its own sake.
+   =========================================================================== */
+
+@theme {
+  /* --- Ground ----------------------------------------------------------- */
+  --color-canvas: #fbfbfa;   /* page */
+  --color-surface: #ffffff;  /* cards */
+  --color-sunk: #f7f6f3;     /* insets, chart grounds */
+  --color-line: #eaeae7;     /* every border, 1px, no exceptions */
+  --color-line-soft: #f2f1ee;
+
+  /* --- Ink. Never pure black. ------------------------------------------- */
+  --color-ink: #26241f;      /* 14.4:1 — headings, big numbers */
+  --color-ink-soft: #6b6862; /*  5.6:1 — body, secondary values */
+  --color-ink-faint: #75716a; /*  4.7:1 — labels; passes AA at 11px+ */
+
+  /* --- Semantic pairs. Pale ground + dark text, always used together. ----
+     A tint alone never carries meaning: every state also ships a word.     */
+  --color-fresh: #346538;
+  --color-fresh-soft: #edf3ec;
+  --color-fresh-line: #a8c9aa;
+
+  --color-warn: #8a5c00;
+  --color-warn-soft: #fbf3db;
+  --color-warn-line: #e0c380;
+
+  --color-risk: #9f2f2d;
+  --color-risk-soft: #fdebec;
+  --color-risk-line: #e2a5a2;
+
+  --color-cool: #1f6c9f;      /* the temperature hue — the chart's voice */
+  --color-cool-soft: #e1f3fe;
+  --color-cool-line: #9dc9e6;
+
+  /* --- Type ------------------------------------------------------------- */
+  --font-display: "Outfit Variable", "Outfit", ui-sans-serif, system-ui, sans-serif;
+  --font-body: "Plus Jakarta Sans Variable", "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+}
+
+@layer base {
+  html {
+    background: var(--color-canvas);
+    color-scheme: light;
+  }
+
+  body {
+    margin: 0;
+    background: var(--color-canvas);
+    color: var(--color-ink);
+    font-family: var(--font-body);
+    font-size: 14px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  /* Numbers must not jitter as telemetry updates. */
+  output,
+  time,
+  .tnum {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum" 1;
+  }
+
+  ::selection {
+    background: var(--color-cool-soft);
+    color: var(--color-cool);
+  }
+
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: #dcdad5 transparent;
+  }
+  *::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  *::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  *::-webkit-scrollbar-thumb {
+    background: #dcdad5;
+    border-radius: 999px;
+    border: 3px solid var(--color-canvas);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-cool);
+    outline-offset: 2px;
+    border-radius: 6px;
+  }
+}
+
+@layer components {
+  /* --- Display: the big friendly numbers ------------------------------- */
+  .t-display {
+    font-family: var(--font-display);
+    font-weight: 600;
+    letter-spacing: -0.03em;
+    line-height: 1;
+  }
+
+  .t-title {
+    font-family: var(--font-display);
+    font-weight: 600;
+    letter-spacing: -0.015em;
+    line-height: 1.25;
+  }
+
+  /* --- Label: sentence case, readable. No tiny tracked-out caps. ------- */
+  .t-label {
+    font-family: var(--font-body);
+    font-size: 12.5px;
+    font-weight: 500;
+    line-height: 1.4;
+    color: var(--color-ink-faint);
+  }
+
+  /* --- Card: the one container. 1px line, soft corner, no shadow. ------ */
+  .card {
+    background: var(--color-surface);
+    border: 1px solid var(--color-line);
+    border-radius: 12px;
+  }
+
+  /* --- Status pill ----------------------------------------------------- */
+  .pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.3;
+    white-space: nowrap;
+  }
+}
+
+@layer utilities {
+  /* Ultra-diffuse lift on interactive cards. Nothing heavier than this. */
+  .lift {
+    transition:
+      box-shadow 200ms ease,
+      border-color 200ms ease;
+  }
+  .lift:hover {
+    box-shadow: 0 2px 8px rgba(38, 36, 31, 0.04);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+@keyframes breathe {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.45;
+    transform: scale(0.86);
+  }
+}
+.animate-breathe {
+  animation: breathe 2.4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
