@@ -1,40 +1,43 @@
-/** Formatting helpers. Every readout is fixed-width so digits never reflow. */
+/** Formatting helpers. Everything reads the way a person would say it. */
 
-export const degC = (v: number, dp = 1) => `${v.toFixed(dp)}`
+const TZ = "Asia/Kolkata"
 
 export const pad = (v: number, width: number) => String(v).padStart(width, "0")
 
-/** Cold life as HHhMMm, or an explicit sentinel. Never a bare "0". */
+/** "37h 10m", "45m". Never a bare "0". */
 export function duration(min: number): string {
-  if (!Number.isFinite(min)) return "a long time"
-  if (min <= 0) return "no time left"
+  if (!Number.isFinite(min)) return "over 2 days"
+  if (min <= 0) return "no time"
   const h = Math.floor(min / 60)
   const m = Math.floor(min % 60)
   return h > 0 ? `${h}h ${pad(m, 2)}m` : `${m}m`
 }
 
-export function clockIST(t: number): string {
-  return new Intl.DateTimeFormat("en-GB", {
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
-    hour12: false,
-    timeZone: "Asia/Kolkata",
-  }).format(t)
+const clockFmt = new Intl.DateTimeFormat("en-IN", {
+  hour: "numeric",
+  minute: "2-digit",
+  hour12: true,
+  timeZone: TZ,
+})
+
+/** "7:12 pm" */
+export function clock(t: number): string {
+  return clockFmt.format(t).replace(/\s?([ap])\.?m\.?/i, " $1m").toLowerCase()
 }
 
-export function timeShort(t: number): string {
-  return new Intl.DateTimeFormat("en-GB", {
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: false,
-    timeZone: "Asia/Kolkata",
-  }).format(t)
-}
+const dayFmt = new Intl.DateTimeFormat("en-CA", { timeZone: TZ })
+const dayKey = (t: number) => dayFmt.format(t)
 
-/** Map a value into a 0..1 fraction of a range, clamped. */
-export const norm = (v: number, lo: number, hi: number) =>
-  Math.max(0, Math.min(1, (v - lo) / (hi - lo)))
+/** "7:12 pm", "1:20 am tomorrow", or "Thu 9:00 am" — relative to `now`. */
+export function clockDay(t: number, now: number): string {
+  const a = dayKey(now)
+  const b = dayKey(t)
+  if (a === b) return clock(t)
+  if (dayKey(now + 86_400_000) === b) return `${clock(t)} tomorrow`
+  if (dayKey(now - 86_400_000) === b) return `${clock(t)} yesterday`
+  const wd = new Intl.DateTimeFormat("en-IN", { weekday: "short", timeZone: TZ }).format(t)
+  return `${wd} ${clock(t)}`
+}
 
 /**
  * "MANDYA / BASARALU" -> "Basaralu". Route records arrive uppercase from the

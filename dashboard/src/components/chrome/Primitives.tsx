@@ -30,8 +30,9 @@ export function Card({
   return (
     <section className={cn("card flex min-h-0 flex-col overflow-hidden", className)}>
       {title ? (
-        <header className="flex shrink-0 items-center justify-between gap-4 px-5 pt-4 pb-3">
-          <div className="flex min-w-0 items-center gap-2.5">
+        <header className="flex shrink-0 flex-wrap items-center justify-between gap-x-4 gap-y-2 px-5 pt-4 pb-3">
+          {/* Takes the row, but the `right` slot wraps below before this does. */}
+          <div className="flex min-w-[min(100%,210px)] flex-1 items-center gap-2.5">
             {icon ? (
               <span
                 aria-hidden
@@ -123,76 +124,5 @@ export function StatusPill({
       <span aria-hidden className={cn("size-1.5 shrink-0 rounded-full", m.dot)} />
       {m.word}
     </span>
-  )
-}
-
-/** A number with a plain-language label above it. */
-export function Readout({
-  label,
-  icon,
-  value,
-  unit,
-  sub,
-  tone,
-  size = "md",
-  className,
-}: {
-  label: string
-  icon?: ReactNode
-  value: ReactNode
-  unit?: string
-  sub?: ReactNode
-  tone?: string
-  size?: "sm" | "md" | "lg"
-  className?: string
-}) {
-  const scale = {
-    sm: "text-[24px]",
-    md: "text-[34px]",
-    lg: "text-[clamp(3.5rem,8vw,5rem)]",
-  }[size]
-
-  return (
-    <div className={cn("flex flex-col gap-2", className)}>
-      <span className="t-label flex items-center gap-1.5">
-        {icon ? (
-          <span aria-hidden className="shrink-0 opacity-70">
-            {icon}
-          </span>
-        ) : null}
-        {label}
-      </span>
-      <div className="flex items-baseline gap-1.5">
-        <output className={cn("t-display text-ink", scale, tone)}>{value}</output>
-        {unit ? (
-          <span className={cn("text-[15px] font-medium text-ink-faint", tone)}>{unit}</span>
-        ) : null}
-      </div>
-      {sub ? <div className="text-[13px] leading-snug text-ink-soft">{sub}</div> : null}
-    </div>
-  )
-}
-
-/**
- * A rounded progress track. Reads as "how much is left", which is the only
- * question a seller asks of a cooling pack or a countdown.
- */
-export function Meter({
-  frac,
-  tone = "bg-cool",
-  className,
-}: {
-  frac: number
-  tone?: string
-  className?: string
-}) {
-  const pct = Math.max(0, Math.min(1, frac)) * 100
-  return (
-    <div className={cn("h-2 w-full overflow-hidden rounded-full bg-sunk", className)} aria-hidden>
-      <div
-        className={cn("h-full rounded-full transition-[width] duration-500 ease-out", tone)}
-        style={{ width: `${pct}%` }}
-      />
-    </div>
   )
 }

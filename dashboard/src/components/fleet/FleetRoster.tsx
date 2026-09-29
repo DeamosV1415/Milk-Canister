@@ -1,17 +1,16 @@
 import { CaretRightIcon } from "@phosphor-icons/react/dist/csr/CaretRight"
 import { cn } from "@/lib/utils"
-import { duration, placeName } from "@/lib/format"
+import { placeName } from "@/lib/format"
+import { rosterNote } from "@/lib/story"
 import { MicroTrace } from "@/components/charts/MicroTrace"
 import { STATUS_META } from "@/components/chrome/Primitives"
-import { SAFE_BAND, type CanNode, type NodeStatus } from "@/telemetry/types"
+import { sortCans } from "@/lib/fleet"
+import { SAFE_BAND, type CanNode } from "@/telemetry/types"
 
 /**
- * The cans, worst first. A seller scans down and stops when it goes quiet.
- * Structure is unchanged from the tactical version — it worked — but the row
- * now leads with the temperature and says what to do about it in words.
+ * The cans, worst first. Each row leads with the temperature and says what is
+ * going on in words.
  */
-const RANK: Record<NodeStatus, number> = { breach: 0, offline: 1, watch: 2, nominal: 3 }
-
 export function FleetRoster({
   nodes,
   selectedId,
@@ -21,14 +20,9 @@ export function FleetRoster({
   selectedId: string
   onSelect: (id: string) => void
 }) {
-  const sorted = [...nodes].sort((a, b) => {
-    const r = RANK[a.derived.status] - RANK[b.derived.status]
-    return r !== 0 ? r : a.derived.coldLifeMin - b.derived.coldLifeMin
-  })
-
   return (
     <ul className="flex flex-col gap-2 px-3 pb-3" role="listbox" aria-label="Your cans">
-      {sorted.map((n) => {
+      {sortCans(nodes).map((n) => {
         const meta = STATUS_META[n.derived.status]
         const selected = n.id === selectedId
         const offline = n.derived.status === "offline"
@@ -48,7 +42,7 @@ export function FleetRoster({
                   : "border-line bg-surface hover:border-ink/15",
               )}
             >
-              {/* Status stripe. Colour plus the word below — never colour alone. */}
+              {/* Status stripe. Colour plus the words beside it — never colour alone. */}
               <span aria-hidden className={cn("h-9 w-1 shrink-0 rounded-full", meta.dot)} />
 
               <span className="flex min-w-0 flex-1 flex-col gap-0.5">
@@ -58,17 +52,11 @@ export function FleetRoster({
                     {placeName(n.route)}
                   </span>
                 </span>
-                <span className={cn("truncate text-[12.5px]", meta.text)}>
-                  {offline
-                    ? "No signal"
-                    : tooWarm
-                      ? "Too warm now"
-                      : `Cold for ${duration(n.derived.coldLifeMin).toLowerCase()}`}
-                </span>
+                <span className={cn("truncate text-[12.5px]", meta.text)}>{rosterNote(n)}</span>
               </span>
 
               <MicroTrace
-                values={n.history.slice(-40).map((r) => r.milkCoreC)}
+                values={n.history.slice(-60).map((r) => r.milkCoreC)}
                 width={40}
                 height={22}
                 ceiling={SAFE_BAND.max}

@@ -1,4 +1,3 @@
-import type { ReactNode } from "react"
 import { cn } from "@/lib/utils"
 
 /* ===========================================================================
@@ -59,46 +58,6 @@ export function Segmented<T extends string>({
         </button>
       ))}
     </div>
-  )
-}
-
-/**
- * Primary action. Solid ink, minimal radius, tactile press. Used sparingly —
- * at most one per screen, and only when there is something to actually do.
- */
-export function Button({
-  children,
-  onClick,
-  icon,
-  tone = "ink",
-  className,
-}: {
-  children: ReactNode
-  onClick?: () => void
-  icon?: ReactNode
-  tone?: "ink" | "warn" | "risk"
-  className?: string
-}) {
-  const tones = {
-    ink: "bg-ink text-canvas hover:bg-ink/90",
-    warn: "bg-warn text-white hover:bg-warn/90",
-    risk: "bg-risk text-white hover:bg-risk/90",
-  }[tone]
-
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={cn(
-        "inline-flex shrink-0 items-center gap-2 rounded-lg px-4 py-2.5 text-[13.5px] font-semibold",
-        "transition-[background-color,transform] duration-150 active:scale-[0.98]",
-        tones,
-        className,
-      )}
-    >
-      {icon}
-      {children}
-    </button>
   )
 }
 

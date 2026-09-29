@@ -8,6 +8,9 @@ dist/
 # Tooling scratch — browser QA logs, not source
 .gstack/
 
+# Throwaway thermal simulation, not part of the project
+simulation.cpp
+
 # Editor
 .vscode/*
 !.vscode/extensions.json

@@ -9,20 +9,23 @@
  * Nothing in `src/components` imports the simulator directly, so no UI code
  * changes.
  *
- *   export class MqttTelemetrySource implements TelemetrySource {
- *     subscribe(cb: (snap: FleetSnapshot) => void) {
- *       const client = mqtt.connect(BROKER_URL)
- *       client.on("message", (_topic, buf) => cb(decode(buf)))
- *       return () => client.end()
+ *   export class HttpTelemetrySource implements TelemetrySource {
+ *     readonly label = "ESP32 fleet"
+ *     readonly isLive = true
+ *     subscribe(cb: (snap: RawSnapshot) => void) {
+ *       const poll = async () => cb(await (await fetch(API_URL)).json())
+ *       poll()
+ *       const h = setInterval(poll, 15_000)
+ *       return () => clearInterval(h)
  *     }
  *   }
  *
- * The only contract is: call `cb` with a complete `FleetSnapshot` whenever new
- * data arrives, and return a teardown function. Push or poll, MQTT or HTTP or
- * WebSocket — the dashboard does not care.
+ * The only contract is: call `cb` with a complete `RawSnapshot` whenever new
+ * data arrives, and return a teardown. Send readings only — status, cold life,
+ * "offline" and the day's events are all worked out dashboard-side.
  */
 
-import type { FleetSnapshot } from "./types"
+import type { RawSnapshot } from "./types"
 
 export interface TelemetrySource {
   /**
@@ -31,11 +34,31 @@ export interface TelemetrySource {
    *
    * @returns teardown that stops delivery and releases the transport.
    */
-  subscribe(cb: (snapshot: FleetSnapshot) => void): () => void
+  subscribe(cb: (snapshot: RawSnapshot) => void): () => void
 
-  /** Human-readable transport label, rendered in the status bar. */
+  /** Human-readable transport label. */
   readonly label: string
 
   /** False for simulated data, so the UI can mark it as such. Never lie here. */
   readonly isLive: boolean
+
+  /**
+   * Presenter controls. Only the simulator has these; a real source leaves
+   * this undefined and the demo panel never renders.
+   */
+  readonly demo?: DemoControls
+}
+
+/** Things that can go wrong with a can, on demand, for a live demo. */
+export type Scenario = "lidOpen" | "heatwave" | "coolerFault" | "batteryDead" | "signalLost"
+
+export interface DemoControls {
+  /** Switch a scenario on or off for one can. */
+  toggle(nodeId: string, scenario: Scenario): void
+  /** Which scenarios are currently switched on for one can. */
+  active(nodeId: string): ReadonlySet<Scenario>
+  /** Run the simulation forward instantly. */
+  skip(minutes: number): void
+  /** Clear every scenario on a can and put it back in working order. */
+  fix(nodeId: string): void
 }

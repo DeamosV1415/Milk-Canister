@@ -13,4 +13,4 @@ export const telemetrySource: TelemetrySource = new SimulatedTelemetrySource()
 
 export * from "./types"
 export * from "./thermal"
-export type { TelemetrySource } from "./source"
+export type { TelemetrySource, DemoControls, Scenario } from "./source"
